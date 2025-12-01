@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+  format:
+    cmds:
+      - ocamlformat --inplace ./lib/**/*.ml
+      - ocamlformat --inplace ./lib/*.ml
+      - ocamlformat --inplace ./bin/*.ml
+  run:
+    cmds:
+      - dune exec bin/main.exe {{.CLI_ARGS}}

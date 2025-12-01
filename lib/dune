@@ -1,0 +1,3 @@
+(library
+ (name advent)
+ (libraries day1 day2 shared))
