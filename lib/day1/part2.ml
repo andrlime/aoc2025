@@ -38,4 +38,4 @@ let solver input =
   |> fun acc -> acc.numzeros |> string_of_int
 ;;
 
-let solution = { label = "Day 1, Part 2"; inputfile = "./input/day1.txt"; solver }
+let solution = { label = "Day 1, Part 2"; inputfile = "./input/day1/short.txt"; solver }
