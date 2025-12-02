@@ -1,19 +1,29 @@
+open! Shared.Exception
 open! Shared.Util
 open! Shared.Solver
 open! Common
 
 let get_nth_chunk str chunksize n = String.sub str (n * chunksize) chunksize
 
+let check_chunk_matches str firstchunk chunksize n =
+  let chunk = get_nth_chunk str chunksize n in
+  if chunk <> firstchunk then raise (Break "chunks don't match")
+;;
+
 let is_invalid_subsequence str chunksize =
   let strlen = String.length str in
   let can_evenly_divide_chunksize = strlen mod chunksize = 0 in
-  let numchunks = strlen / chunksize in
   if not can_evenly_divide_chunksize
   then false
-  else
-    ListUtil.range 0 (numchunks - 1)
-    |> List.map (get_nth_chunk str chunksize)
-    |> ListUtil.all_elems_in_list_equal
+  else (
+    try
+      let firstchunk = get_nth_chunk str chunksize 0 in
+      let numchunks = strlen / chunksize in
+      ListUtil.range 1 (numchunks - 1)
+      |> List.iter (check_chunk_matches str firstchunk chunksize);
+      true
+    with
+    | Break _ -> false)
 ;;
 
 let is_invalid_id id =
