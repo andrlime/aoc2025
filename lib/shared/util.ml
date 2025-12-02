@@ -16,6 +16,11 @@ module StringUtil = struct
     let lasthalf = String.sub str at (String.length str - at) in
     firsthalf, lasthalf
   ;;
+
+  let slice_in_half str =
+    let halflength = String.length str / 2 in
+    slice str halflength
+  ;;
 end
 
 module ListUtil = struct
@@ -26,6 +31,22 @@ module ListUtil = struct
       match l1, l2 with
       | f1 :: r1, f2 :: r2 -> (f1, f2) :: zip r1 r2
       | _ -> [])
+  ;;
+
+  let range lower upper =
+    let rec f cur lowerbound lst =
+      if cur < lowerbound then lst else f (cur - 1) lowerbound (cur :: lst)
+    in
+    f upper lower []
+  ;;
+
+  let all_elems_in_list_equal list =
+    let rec all_equal list thing =
+      match list with
+      | first :: rst -> first = thing && all_equal rst thing
+      | [] -> true
+    in
+    if List.length list = 0 then true else all_equal list (List.nth list 0)
   ;;
 end
 

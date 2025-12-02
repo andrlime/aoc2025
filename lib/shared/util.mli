@@ -5,10 +5,13 @@ end
 
 module StringUtil : sig
   val slice : string -> int -> (string * string)
+  val slice_in_half : string -> (string * string)
 end
 
 module ListUtil : sig
   val zip : 'a list -> 'b list -> ('a * 'b) list
+  val range : int -> int -> int list
+  val all_elems_in_list_equal : 'a list -> bool
 end
 
 module Physics : sig
