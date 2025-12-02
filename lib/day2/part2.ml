@@ -1,6 +1,6 @@
-open Shared.Util
-open Shared.Solver
-open Common
+open! Shared.Util
+open! Shared.Solver
+open! Common
 
 let is_invalid_subsequence str chunksize =
   let strlen = String.length str in

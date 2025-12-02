@@ -5,6 +5,7 @@ let solutions =
        ; "1b", Day1.Part2.solution
        ; "2a", Day2.Part1.solution
        ; "2b", Day2.Part2.solution
+       ; "3a", Day3.Part1.solution
        ])
 ;;
 

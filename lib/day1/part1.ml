@@ -1,6 +1,6 @@
-open Shared.Util
-open Shared.Solver
-open Common
+open! Shared.Util
+open! Shared.Solver
+open! Common
 
 let apply_direction acc cur =
   let current_offset = acc.offset in

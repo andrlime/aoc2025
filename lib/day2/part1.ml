@@ -1,6 +1,6 @@
-open Shared.Util
-open Shared.Solver
-open Common
+open! Shared.Util
+open! Shared.Solver
+open! Common
 
 let is_invalid_id id =
   let firsthalf, secondhalf = string_of_int id |> StringUtil.slice_in_half in

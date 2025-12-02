@@ -1,6 +1,6 @@
-open Shared.Util
-open Shared.Solver
-open Common
+open! Shared.Util
+open! Shared.Solver
+open! Common
 
 let get_num_zeros src direction =
   let steps_to_first_zero =
