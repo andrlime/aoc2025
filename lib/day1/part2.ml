@@ -1,4 +1,5 @@
-open Shared
+open Shared.Util
+open Shared.Solver
 open Common
 
 let get_num_zeros src direction =
@@ -31,12 +32,10 @@ let apply_direction acc cur =
 
 let solver input =
   input
-  |> Util.split_string_into_lines
+  |> Io.split_string_into_lines
   |> List.filter_map direction_of_string
   |> List.fold_left apply_direction initial_state
   |> fun acc -> acc.numzeros |> string_of_int
 ;;
 
-let solution =
-  { label = "Day 1, Part 2"; input = Util.read_file "./input/day1.txt"; solver }
-;;
+let solution = { label = "Day 1, Part 2"; inputfile = "./input/day1.txt"; solver }

@@ -1,3 +1,5 @@
+open Shared
+
 type direction =
   | Left of int
   | Right of int
@@ -19,10 +21,10 @@ let direction_of_string s =
   if len == 0
   then None
   else (
-    let dir = String.get s 0 in
-    let rest = int_of_string (String.sub s 1 (String.length s - 1)) in
+    let dir, rest = Util.StringUtil.slice s 1 in
+    let offset = int_of_string rest in
     match dir with
-    | 'L' -> Some (Left rest)
-    | 'R' -> Some (Right rest)
+    | "L" -> Some (Left offset)
+    | "R" -> Some (Right offset)
     | _ -> failwith "invalid direction")
 ;;
