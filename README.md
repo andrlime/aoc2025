@@ -1,2 +1,2 @@
 # Advent of Code 2025
-I did these in OCaml. There is a wrapper function somewhere that runs each day's code. Each day/part is bound into a registry (just a hash-table) and called via command line arguments.
+I did these in OCaml. There is a functor that takes a single solution and creates a solver for it. The solver times and prints the solution. Each solution is registered in `registry.ml` and called via command line arguments. Expect tests exist for the solutions, but require setting the working directory of the project using an environment variable to get past the dune sandbox. I'm also not sure why the test files run in Z-A order, but the design of `ppx_expect` is not my job!
