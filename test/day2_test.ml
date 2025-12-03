@@ -1,13 +1,11 @@
-open Advent.Registry
+open Common
 
 let%expect_test "day2 part1" =
-  let module Soln = (val get_solution "2a") in
-  Soln.get_soln_string () |> print_endline;
+  get_solution_string "2a" |> print_endline;
   [%expect {| 18952700150 |}]
 ;;
 
 let%expect_test "day2 part2" =
-  let module Soln = (val get_solution "2b") in
-  Soln.get_soln_string () |> print_endline;
+  get_solution_string "2b" |> print_endline;
   [%expect {| 28858486244 |}]
 ;;
