@@ -13,16 +13,18 @@ let get_first_largest_digit_and_index ~i0 ~i1 bank =
        initial_state
 ;;
 
-let rec get_joltage_from_bank startindex numdigits bank =
-  if numdigits = 0
+let rec get_joltage_from_bank ?(startindex = 0) ?(digits = 12) bank =
+  if digits = 0
   then []
   else (
     let banklength = List.length bank in
-    let endindex = banklength - numdigits in
+    let endindex = banklength - digits in
     let { largestdigit; largestindex } =
       get_first_largest_digit_and_index ~i0:startindex ~i1:endindex bank
     in
-    largestdigit :: get_joltage_from_bank (largestindex + 1) (numdigits - 1) bank)
+    let new_index = Some (largestindex + 1) in
+    let new_digits = Some (digits - 1) in
+    largestdigit :: get_joltage_from_bank ?startindex:new_index ?digits:new_digits bank)
 ;;
 
 let int_of_bank bank = bank |> List.fold_left (fun acc cur -> (acc * 10) + cur) 0
@@ -31,7 +33,7 @@ let solver input =
   input
   |> String.split_on_char '\n'
   |> List.filter_map bank_of_string
-  |> List.map (get_joltage_from_bank 0 12)
+  |> List.map get_joltage_from_bank
   |> List.map int_of_bank
   |> ListUtil.intsum
   |> string_of_int
