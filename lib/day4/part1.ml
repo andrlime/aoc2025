@@ -3,8 +3,7 @@ open! Shared.Solver
 open! Common
 
 let solver input =
-  input
-  |> ignore;
+  input |> ignore;
   "A"
 ;;
 
