@@ -2,9 +2,13 @@ open! Shared.Util
 open! Shared.Solver
 open! Common
 
-let solver input =
-  input |> ignore;
-  "A"
-;;
+module M : Solution = struct
+  type t = string
 
-let solution = { label = "Day 4, Part 1"; inputfile = "./input/day4/full.txt"; solver }
+  let label = "Day 4, Part 1"
+  let input = "./input/day4/full.txt"
+  let parse_input input = input
+  let solver input = input
+end
+
+include Make (M)

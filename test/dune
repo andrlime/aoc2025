@@ -1,0 +1,13 @@
+(library
+ (name test_advent)
+ (inline_tests
+  (deps
+   (sandbox always)
+   (source_tree input)))
+ (libraries
+  advent
+  ppx_expect.config
+  ppx_expect.config_types
+  ppx_inline_test.config)
+ (preprocess
+  (pps ppx_expect)))

@@ -6,6 +6,14 @@ tasks:
       - ocamlformat --inplace ./lib/**/*.ml
       - ocamlformat --inplace ./lib/*.ml
       - ocamlformat --inplace ./bin/*.ml
+      - ocamlformat --inplace ./test/*.ml
   run:
+    dir: .
     cmds:
       - dune exec bin/main.exe {{.CLI_ARGS}}
+    silent: true
+  test:
+    dir: .
+    cmds:
+      - PROJECT_ROOT=`pwd` dune test
+    silent: true

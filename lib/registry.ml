@@ -1,17 +1,11 @@
-let solutions =
-  Hashtbl.of_seq
-    (List.to_seq
-       [ "1a", Day1.Part1.solution
-       ; "1b", Day1.Part2.solution
-       ; "2a", Day2.Part1.solution
-       ; "2b", Day2.Part2.solution
-       ; "3a", Day3.Part1.solution
-       ; "3b", Day3.Part2.solution
-       ; "4a", Day4.Part1.solution
-       ])
-;;
-
-let get_solution key =
-  try Hashtbl.find solutions key with
-  | Not_found -> failwith (Printf.sprintf "solution %s not found" key)
+let get_solution key : (module Shared.Solver.T) =
+  match key with
+  | "1a" -> (module Day1.Part1)
+  | "1b" -> (module Day1.Part2)
+  | "2a" -> (module Day2.Part1)
+  | "2b" -> (module Day2.Part2)
+  | "3a" -> (module Day3.Part1)
+  | "3b" -> (module Day3.Part2)
+  | "4a" -> (module Day4.Part1)
+  | _ -> failwith (Printf.sprintf "solution %s not found" key)
 ;;

@@ -1,3 +1,1 @@
-val solutions : (string, Shared.Solver.solution) Hashtbl.t
-
-val get_solution : string -> Shared.Solver.solution
+val get_solution : string -> (module Shared.Solver.T)

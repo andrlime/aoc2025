@@ -1,7 +1,18 @@
-type solution =
-  { label : string
-  ; inputfile : string
-  ; solver : string -> string
-  }
+module type Solution = sig
+  
+  type t
 
-val solve : solution -> unit
+  val label : string
+  val input : string
+
+  val parse_input : string -> t
+  val solver : t -> string
+
+end
+
+module type T = sig
+  val time_and_solve : unit -> unit
+  val get_soln_string : unit -> string
+end
+
+module Make (_ : Solution) : T

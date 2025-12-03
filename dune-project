@@ -19,7 +19,7 @@
  (name advent)
  (synopsis "Advent of Code, 2025 in OCaml")
  (description "A longer description")
- (depends ocaml)
+ (depends ocaml ppx_expect)
  (tags
   ("aoc2025")))
 
