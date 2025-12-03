@@ -5,13 +5,12 @@ open! Common
 let get_first_largest_digit_and_index ~i0 ~i1 bank =
   ListUtil.range i0 i1
   |> List.fold_left
-       (fun acc cur ->
-          let cur_max_num, _ = acc.largestdigit, acc.largestindex in
-          let num_at_cur = List.nth bank cur in
-          if num_at_cur > cur_max_num
-          then { largestdigit = num_at_cur; largestindex = cur }
+       (fun acc curindex ->
+          let curnum = List.nth bank curindex in
+          if curnum > acc.largestdigit
+          then { largestdigit = curnum; largestindex = curindex }
           else acc)
-       invalid_state
+       initial_state
 ;;
 
 let rec get_joltage_from_bank startindex numdigits bank =

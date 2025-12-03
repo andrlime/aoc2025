@@ -8,7 +8,7 @@ type accumulator =
   ; largestindex : int
   }
 
-let invalid_state = { largestdigit = -1; largestindex = -1 }
+let initial_state = { largestdigit = -1; largestindex = -1 }
 let battery_of_char c = int_of_char c - int_of_char '0'
 
 let bank_of_string s =
