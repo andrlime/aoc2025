@@ -21,6 +21,17 @@ module StringUtil = struct
     let halflength = String.length str / 2 in
     slice str halflength
   ;;
+
+  let charlist_of_string str =
+    let rec helper index accumulator =
+      if index < 0
+      then accumulator
+      else (
+        let curchar = String.get str index in
+        helper (index - 1) (curchar :: accumulator))
+    in
+    helper (String.length str - 1) []
+  ;;
 end
 
 module ListUtil = struct
@@ -48,6 +59,15 @@ module ListUtil = struct
     in
     if List.length list = 0 then true else all_equal list (List.nth list 0)
   ;;
+
+  let rec intmax list =
+    match list with
+    | first :: [] -> first
+    | first :: rest -> max first (intmax rest)
+    | [] -> failwith "cannot take max of empty list"
+  ;;
+
+  let intsum list = list |> List.fold_left (fun acc cur -> acc + cur) 0
 end
 
 (* TODO: Maybe extend this to floats using a functor *)
