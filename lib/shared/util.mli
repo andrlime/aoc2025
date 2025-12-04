@@ -3,6 +3,10 @@ module Io : sig
   val split_string_into_lines : string -> string list
 end
 
+module ArrayUtil : sig
+  val iter2d : ('a -> unit) -> 'a array array -> unit
+end
+
 module StringUtil : sig
   val slice : string -> int -> (string * string)
   val slice_in_half : string -> (string * string)

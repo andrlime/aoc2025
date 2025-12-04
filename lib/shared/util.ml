@@ -15,6 +15,10 @@ module Io = struct
   let split_string_into_lines str = str |> String.split_on_char '\n'
 end
 
+module ArrayUtil = struct
+  let iter2d f grid = grid |> Array.iter (Array.iter f)
+end
+
 module StringUtil = struct
   let slice str at =
     let firsthalf = String.sub str 0 at in
