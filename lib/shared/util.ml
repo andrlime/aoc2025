@@ -17,6 +17,7 @@ end
 
 module ArrayUtil = struct
   let iter2d f grid = grid |> Array.iter (Array.iter f)
+  let map2d f grid = grid |> Array.map (Array.map f)
 end
 
 module StringUtil = struct
@@ -81,6 +82,8 @@ module ListUtil = struct
   ;;
 
   let intsum list = list |> List.fold_left (fun acc cur -> acc + cur) 0
+  let iter2d f grid = grid |> List.iter (List.iter f)
+  let map2d f grid = grid |> List.map (List.map f)
 end
 
 module Neighbors = struct

@@ -1,13 +1,10 @@
 module type Solution = sig
-  
   type t
 
   val label : string
   val input : string
-
   val parse_input : string -> t
   val solver : t -> string
-
 end
 
 module type T = sig

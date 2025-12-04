@@ -5,11 +5,12 @@ end
 
 module ArrayUtil : sig
   val iter2d : ('a -> unit) -> 'a array array -> unit
+  val map2d : ('a -> 'b) -> 'a array array -> 'b array array
 end
 
 module StringUtil : sig
-  val slice : string -> int -> (string * string)
-  val slice_in_half : string -> (string * string)
+  val slice : string -> int -> string * string
+  val slice_in_half : string -> string * string
   val charlist_of_string : string -> char list
 end
 
@@ -20,10 +21,12 @@ module ListUtil : sig
   val all_elems_in_list_equal : 'a list -> bool
   val intmax : int list -> int
   val intsum : int list -> int
+  val iter2d : ('a -> unit) -> 'a list list -> unit
+  val map2d : ('a -> 'b) -> 'a list list -> 'b list list
 end
 
 module Neighbors : sig
-  val neighbors_2d : (int * int) list 
+  val neighbors_2d : (int * int) list
 end
 
 module Physics : sig

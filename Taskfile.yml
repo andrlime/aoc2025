@@ -7,6 +7,9 @@ tasks:
       - ocamlformat --inplace ./lib/*.ml
       - ocamlformat --inplace ./bin/*.ml
       - ocamlformat --inplace ./test/*.ml
+
+      - ocamlformat --inplace ./lib/**/*.mli
+      - ocamlformat --inplace ./lib/*.mli
     silent: false
     aliases:
       - f
