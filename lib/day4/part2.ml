@@ -9,14 +9,13 @@ module M : Solution = struct
   let input = "./input/day4/full.txt"
 
   let get_neighbors_count grid tile =
-    let r, c = GridSquare.(tile.row), GridSquare.(tile.col) in
+    let r, c = tile.row, tile.col in
     Neighbors.neighbors_2d
     |> List.filter_map (fun (dr, dc) ->
       let rprime, cprime = r + dr, c + dc in
       try Some (List.nth (List.nth grid rprime) cprime) with
       | _ -> None)
-    |> List.filter_map (fun n ->
-      if RawGrid.is_paper GridSquare.(n.square) then Some 1 else None)
+    |> List.filter_map (fun n -> if RawGrid.is_paper n.square then Some 1 else None)
     |> ListUtil.intsum
   ;;
 
@@ -24,7 +23,7 @@ module M : Solution = struct
     input
     |> String.split_on_char '\n'
     |> ListUtil.remove_lines_shorter_than 1
-    |> GridSquare.t_list_of_rawgrid
+    |> t_list_of_rawgrid
   ;;
 
   let make_removed_set rs =
@@ -38,9 +37,9 @@ module M : Solution = struct
     original_grid
     |> List.map
          (List.map (fun tile ->
-            let r, c = GridSquare.(tile.row), GridSquare.(tile.col) in
+            let r, c = tile.row, tile.col in
             if Hashtbl.mem removed_set (r, c)
-            then GridSquare.{ row = r; col = c; square = RawGrid.Empty }
+            then { row = r; col = c; square = RawGrid.Empty }
             else tile))
   ;;
 
@@ -49,9 +48,9 @@ module M : Solution = struct
       input
       |> List.map
            (List.filter_map (fun tile ->
-              match GridSquare.(tile.square) with
+              match tile.square with
               | RawGrid.PaperRoll ->
-                let r, c = GridSquare.(tile.row), GridSquare.(tile.col) in
+                let r, c = tile.row, tile.col in
                 Some (r, c, get_neighbors_count input tile)
               | RawGrid.Empty -> None))
       |> List.flatten

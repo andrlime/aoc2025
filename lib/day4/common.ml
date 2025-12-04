@@ -43,3 +43,5 @@ module GridSquare = struct
       rowstr |> StringUtil.charlist_of_string |> t_of_list_of_row rowi)
   ;;
 end
+
+include GridSquare
