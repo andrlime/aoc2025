@@ -36,7 +36,7 @@ module M : Solution = struct
   let int_of_bank bank = bank |> List.fold_left (fun acc cur -> (acc * 10) + cur) 0
 
   let parse_input input =
-    input |> String.split_on_char '\n' |> List.filter_map bank_of_string
+    input |> Io.split_string_into_lines |> List.filter_map bank_of_string
   ;;
 
   let solver input =

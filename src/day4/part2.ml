@@ -8,28 +8,18 @@ module M : Solution = struct
   let label = "Day 4, Part 2"
   let input = "./input/day4/full.txt"
 
-  let get_neighbors_count grid tile =
-    let r, c = tile.row, tile.col in
-    Neighbors.neighbors_2d
-    |> List.filter_map (fun (dr, dc) ->
-      try Some grid.(r + dr).(c + dc) with
-      | _ -> None)
-    |> List.filter_map (fun n -> if is_paper n.square then Some 1 else None)
-    |> ListUtil.intsum
-  ;;
-
   let parse_input input =
     input
-    |> String.split_on_char '\n'
+    |> Io.split_string_into_lines
     |> ListUtil.remove_lines_shorter_than 1
     |> t_list_of_rawgrid
     |> List.map Array.of_list
     |> Array.of_list
   ;;
 
-  let make_removed_set rs =
+  let make_removed_set rows =
     let set = Hashtbl.create 31 in
-    rs |> List.iter (fun (r, c, _) -> Hashtbl.add set (r, c) ());
+    rows |> List.iter (fun (r, c, _) -> Hashtbl.add set (r, c) ());
     set
   ;;
 
@@ -47,10 +37,9 @@ module M : Solution = struct
     |> ArrayUtil.iter2d (fun tile ->
       match tile.square with
       | PaperRoll ->
-        let r, c = tile.row, tile.col in
         let nc = get_neighbors_count input tile in
-        if nc >= 4 then () else removed := (r, c, nc) :: !removed
-      | Empty -> ());
+        if nc < 4 then removed := (tile.row, tile.col, nc) :: !removed
+      | _ -> ());
     match List.length !removed with
     | 0 -> acc
     | x -> recursive_helper (acc + x) (make_new_grid input !removed)

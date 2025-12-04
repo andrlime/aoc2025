@@ -8,19 +8,9 @@ module M : Solution = struct
   let label = "Day 4, Part 1"
   let input = "./input/day4/full.txt"
 
-  let get_neighbors_count grid tile =
-    let r, c = tile.row, tile.col in
-    Neighbors.neighbors_2d
-    |> List.filter_map (fun (dr, dc) ->
-      try Some grid.(r + dr).(c + dc) with
-      | _ -> None)
-    |> List.filter_map (fun n -> if is_paper n.square then Some 1 else None)
-    |> ListUtil.intsum
-  ;;
-
   let parse_input input =
     input
-    |> String.split_on_char '\n'
+    |> Io.split_string_into_lines
     |> ListUtil.remove_lines_shorter_than 1
     |> t_list_of_rawgrid
     |> List.map Array.of_list
@@ -34,8 +24,8 @@ module M : Solution = struct
       match tile.square with
       | PaperRoll ->
         let nc = get_neighbors_count input tile in
-        if nc >= 4 then () else removed := nc :: !removed
-      | Empty -> ());
+        if nc < 4 then removed := nc :: !removed
+      | _ -> ());
     List.length !removed |> string_of_int
   ;;
 end

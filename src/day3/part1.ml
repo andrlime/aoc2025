@@ -22,7 +22,7 @@ module M : Solution = struct
   ;;
 
   let parse_input input =
-    input |> String.split_on_char '\n' |> List.filter_map bank_of_string
+    input |> Io.split_string_into_lines |> List.filter_map bank_of_string
   ;;
 
   let solver input =

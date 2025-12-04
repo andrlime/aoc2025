@@ -40,6 +40,17 @@ module GridSquare = struct
     |> List.mapi (fun rowi rowstr ->
       rowstr |> StringUtil.charlist_of_string |> t_of_list_of_row rowi)
   ;;
+
+  let get_neighbors_count grid tile =
+    let r, c = tile.row, tile.col in
+    Neighbors.neighbors_2d
+    |> List.filter_map (fun (dr, dc) ->
+      try Some grid.(r + dr).(c + dc) with
+      | _ -> None)
+    |> List.fold_left
+         (fun count tile -> count + (RawGrid.is_paper tile.square |> Bool.to_int))
+         0
+  ;;
 end
 
 include GridSquare
