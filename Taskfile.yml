@@ -3,13 +3,13 @@ version: '3'
 tasks:
   format:
     cmds:
-      - ocamlformat --inplace ./lib/**/*.ml
-      - ocamlformat --inplace ./lib/*.ml
+      - ocamlformat --inplace ./src/**/*.ml
+      - ocamlformat --inplace ./src/*.ml
       - ocamlformat --inplace ./bin/*.ml
       - ocamlformat --inplace ./test/*.ml
 
-      - ocamlformat --inplace ./lib/**/*.mli
-      - ocamlformat --inplace ./lib/*.mli
+      - ocamlformat --inplace ./src/**/*.mli
+      - ocamlformat --inplace ./src/*.mli
     silent: false
     aliases:
       - f
