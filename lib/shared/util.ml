@@ -1,12 +1,11 @@
 module Io = struct
-  let get_project_root () =
-    try Sys.getenv "PROJECT_ROOT" with
-    | Not_found -> "."
+  let concat_with_project_root =
+    try Filename.concat (Sys.getenv "PROJECT_ROOT") with
+    | Not_found -> Filename.concat "."
   ;;
 
   let read_file path =
-    let absolute_path = Filename.concat (get_project_root ()) path in
-    let channel = open_in absolute_path in
+    let channel = path |> concat_with_project_root |> open_in in
     let len = in_channel_length channel in
     let content = really_input_string channel len in
     close_in channel;
