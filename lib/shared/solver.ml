@@ -1,3 +1,5 @@
+open! Core
+
 module type Solution = sig
   type t
 
@@ -13,14 +15,20 @@ module type T = sig
 end
 
 module Make (M : Solution) : T = struct
-  let cur_time_ms () = 1000. *. Sys.time ()
+  let current_timestamp_ms () =
+    Time_ns.now ()
+    |> Time_ns.to_int63_ns_since_epoch
+    |> Int63.to_float
+    |> fun ns -> ns /. 1_000_000.
+  ;;
+
   let get_soln_string () = M.input |> Util.Io.read_file |> M.parse_input |> M.solver
 
   let time_and_solve () =
     print_endline M.label;
-    let starttime = cur_time_ms () in
+    let starttime = current_timestamp_ms () in
     get_soln_string () |> Printf.printf "Solution: %s\n";
-    let endtime = cur_time_ms () in
+    let endtime = current_timestamp_ms () in
     endtime -. starttime |> Printf.printf "Time: %f ms\n"
   ;;
 end
