@@ -10,11 +10,16 @@ module StringUtil : sig
 end
 
 module ListUtil : sig
+  val remove_lines_shorter_than : int -> string list -> string list
   val zip : 'a list -> 'b list -> ('a * 'b) list
   val range : int -> int -> int list
   val all_elems_in_list_equal : 'a list -> bool
   val intmax : int list -> int
   val intsum : int list -> int
+end
+
+module Neighbors : sig
+  val neighbors_2d : (int * int) list 
 end
 
 module Physics : sig

@@ -40,6 +40,10 @@ module StringUtil = struct
 end
 
 module ListUtil = struct
+  let remove_lines_shorter_than length list =
+    list |> List.filter_map (fun l -> if String.length l < length then None else Some l)
+  ;;
+
   let rec zip l1 l2 =
     if List.length l1 <> List.length l2
     then failwith "cannot zip two lists of unequal length"
@@ -73,6 +77,10 @@ module ListUtil = struct
   ;;
 
   let intsum list = list |> List.fold_left (fun acc cur -> acc + cur) 0
+end
+
+module Neighbors = struct
+  let neighbors_2d = [ 1, 1; 1, 0; 1, -1; 0, 1; 0, -1; -1, -1; -1, 0; -1, 1 ]
 end
 
 (* TODO: Maybe extend this to floats using a functor *)
