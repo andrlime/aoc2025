@@ -1,6 +1,6 @@
 (library
  (name advent)
  (libraries
-  day1 day2 day3 day4 shared
+  day1 day2 day3 day4 day5 shared
   core
  ))

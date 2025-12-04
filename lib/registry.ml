@@ -8,5 +8,6 @@ let get_solution key : (module Shared.Solver.T) =
   | "3b" -> (module Day3.Part2)
   | "4a" -> (module Day4.Part1)
   | "4b" -> (module Day4.Part2)
+  | "5a" -> (module Day5.Part1)
   | _ -> failwith (Printf.sprintf "solution %s not found" key)
 ;;

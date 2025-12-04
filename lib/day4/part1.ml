@@ -27,10 +27,11 @@ module M : Solution = struct
   let solver input =
     let grid = input |> GridSquare.t_list_of_rawgrid in
     grid
-    |> List.map (List.filter_map (fun tile ->
-        match GridSquare.(tile.square) with
-        | RawGrid.PaperRoll -> Some (get_neighbors_count grid tile)
-        | RawGrid.Empty -> None))
+    |> List.map
+         (List.filter_map (fun tile ->
+            match GridSquare.(tile.square) with
+            | RawGrid.PaperRoll -> Some (get_neighbors_count grid tile)
+            | RawGrid.Empty -> None))
     |> List.flatten
     |> List.filter_map (fun i -> if i >= 4 then None else Some i)
     |> List.length
