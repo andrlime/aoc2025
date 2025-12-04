@@ -1,0 +1,3 @@
+(library
+ (name template)
+ (libraries shared))
