@@ -1,8 +1,6 @@
 open! Shared.Util
 
 module RawGrid = struct
-  type t = string list
-
   type u =
     | PaperRoll
     | Empty
@@ -28,7 +26,7 @@ module GridSquare = struct
   type t =
     { row : int
     ; col : int
-    ; square : RawGrid.u
+    ; mutable square : RawGrid.u
     }
 
   let t_of_char char row col = { row; col; square = RawGrid.u_of_char char }
@@ -45,3 +43,4 @@ module GridSquare = struct
 end
 
 include GridSquare
+include RawGrid

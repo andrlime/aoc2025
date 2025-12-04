@@ -15,7 +15,7 @@ module M : Solution = struct
       let rprime, cprime = r + dr, c + dc in
       try Some (List.nth (List.nth grid rprime) cprime) with
       | _ -> None)
-    |> List.filter_map (fun n -> if RawGrid.is_paper n.square then Some 1 else None)
+    |> List.filter_map (fun n -> if is_paper n.square then Some 1 else None)
     |> ListUtil.intsum
   ;;
 
@@ -35,12 +35,12 @@ module M : Solution = struct
   let make_new_grid original_grid removed_list =
     let removed_set = make_removed_set removed_list in
     original_grid
-    |> List.map
-         (List.map (fun tile ->
-            let r, c = tile.row, tile.col in
-            if Hashtbl.mem removed_set (r, c)
-            then { row = r; col = c; square = RawGrid.Empty }
-            else tile))
+    |> List.iter
+         (List.iter (fun tile ->
+            if Hashtbl.mem removed_set (tile.row, tile.col)
+            then tile.square <- Empty
+            else ()));
+    original_grid
   ;;
 
   let rec recursive_helper acc input =
@@ -49,12 +49,12 @@ module M : Solution = struct
       |> List.map
            (List.filter_map (fun tile ->
               match tile.square with
-              | RawGrid.PaperRoll ->
+              | PaperRoll ->
                 let r, c = tile.row, tile.col in
-                Some (r, c, get_neighbors_count input tile)
-              | RawGrid.Empty -> None))
+                let nc = get_neighbors_count input tile in
+                if nc >= 4 then None else Some (r, c, nc)
+              | Empty -> None))
       |> List.flatten
-      |> List.filter_map (fun (r, c, n) -> if n >= 4 then None else Some (r, c, n))
     in
     match List.length removed with
     | 0 -> acc

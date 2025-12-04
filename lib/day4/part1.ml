@@ -3,7 +3,7 @@ open! Shared.Solver
 open! Common
 
 module M : Solution = struct
-  type t = RawGrid.t
+  type t = string list
 
   let label = "Day 4, Part 1"
   let input = "./input/day4/full.txt"
@@ -15,7 +15,7 @@ module M : Solution = struct
       let rprime, cprime = r + dr, c + dc in
       try Some (List.nth (List.nth grid rprime) cprime) with
       | _ -> None)
-    |> List.filter_map (fun n -> if RawGrid.is_paper n.square then Some 1 else None)
+    |> List.filter_map (fun n -> if is_paper n.square then Some 1 else None)
     |> ListUtil.intsum
   ;;
 
@@ -29,10 +29,11 @@ module M : Solution = struct
     |> List.map
          (List.filter_map (fun tile ->
             match tile.square with
-            | RawGrid.PaperRoll -> Some (get_neighbors_count grid tile)
-            | RawGrid.Empty -> None))
+            | PaperRoll ->
+              let nc = get_neighbors_count grid tile in
+              if nc >= 4 then None else Some nc
+            | Empty -> None))
     |> List.flatten
-    |> List.filter_map (fun i -> if i >= 4 then None else Some i)
     |> List.length
     |> string_of_int
   ;;
