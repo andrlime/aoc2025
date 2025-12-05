@@ -5,18 +5,17 @@ open! Common
 module M : Solution = struct
   type t = u
 
-  let label = "Day 5, Part 1"
+  let label = "Day 5, Part 2"
   let input = "./input/day5/full.txt"
   let parse_input input = u_of_input input
 
-  let solver (ingredients, ranges) =
+  let solver (_, ranges) =
     ranges
     |> IngredientIdRange.sort
     |> IngredientIdRange.merge
-    |> IntervalAction.create_t_list ingredients
-    |> IntervalAction.sort_t_list
-    |> IntervalAction.count_ingredients_within_intervals
-    |> string_of_int
+    |> List.map IngredientIdRange.get_range_length
+    |> List.fold_left Int64.add Int64.zero
+    |> Int64.to_string
   ;;
 end
 

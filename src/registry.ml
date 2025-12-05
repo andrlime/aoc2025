@@ -8,11 +8,10 @@ let get_solution key : (module Shared.Solver.T) =
   | "3b" -> (module Day3.Part2)
   | "4a" -> (module Day4.Part1)
   | "4b" -> (module Day4.Part2)
-  | "5a" ->
-    (module Day5.Part1)
-    (* | "5b" -> (module Day5.Part2) *)
-
-    (* | "6a" -> (module Day6.Part1) *)
+  | "5a" -> (module Day5.Part1)
+  | "5b" -> (module Day5.Part2)
+  | "6a" ->
+    (module Day6.Part1)
     (* | "6b" -> (module Day6.Part2) *)
 
     (* | "7a" -> (module Day7.Part1) *)
