@@ -1,9 +1,9 @@
 open! Shared.Util
 
 module IngredientId = struct
-  type t = Int64.t
+  type t = int
 
-  let t_of_string s = Int64.of_string s
+  let t_of_string s = int_of_string s
 end
 
 type ingredients = IngredientId.t list
@@ -36,18 +36,14 @@ module IngredientIdRange = struct
     else 0
   ;;
 
-  let get_range_length t =
-    let open Int64 in
-    sub t.high t.low |> add one
-  ;;
-
+  let get_range_length t = t.high - t.low |> fun x -> x + 1
   let sort ranges = List.stable_sort compare ranges
 
   let merge ranges =
     if List.length ranges = 0 then failwith "invalid ranges list";
     let folder accumulator cur =
       let currange, allranges = accumulator in
-      if cur.low <= Int64.(add currange.high one)
+      if cur.low <= currange.high + 1
       then { low = currange.low; high = max cur.high currange.high }, allranges
       else cur, currange :: allranges
     in

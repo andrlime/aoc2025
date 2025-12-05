@@ -14,8 +14,8 @@ module M : Solution = struct
     |> IngredientIdRange.sort
     |> IngredientIdRange.merge
     |> List.map IngredientIdRange.get_range_length
-    |> List.fold_left Int64.add Int64.zero
-    |> Int64.to_string
+    |> ListUtil.intsum
+    |> string_of_int
   ;;
 end
 
