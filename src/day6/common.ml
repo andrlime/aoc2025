@@ -7,8 +7,8 @@ module NumberColumn = struct
 
   let solve t =
     match t with
-    | Add list -> list |> List.fold_left (fun acc cur -> acc + cur) 0
-    | Multiply list -> list |> List.fold_left (fun acc cur -> acc * cur) 1
+    | Add list -> list |> List.fold_left ( + ) 0
+    | Multiply list -> list |> List.fold_left ( * ) 1
   ;;
 
   let t_of_raw_row row =
@@ -16,8 +16,9 @@ module NumberColumn = struct
     let op = ref ' ' in
     row
     |> List.iter (fun r ->
-      let r0 = String.get r 0 in
-      if r0 >= '0' && r0 <= '9' then ints := int_of_string r :: !ints else op := r0);
+      let firstchar = String.get r 0 in
+      let isdigit = firstchar >= '0' && firstchar <= '9' in
+      if isdigit then ints := int_of_string r :: !ints else op := firstchar);
     match !op with
     | '+' -> Add !ints
     | '*' -> Multiply !ints
