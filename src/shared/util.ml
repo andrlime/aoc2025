@@ -49,6 +49,15 @@ module ListUtil = struct
     list |> List.filter_map (fun l -> if String.length l < length then None else Some l)
   ;;
 
+  let rec uniform_zip lists =
+    if lists |> List.exists (fun l -> l = [])
+    then []
+    else (
+      let heads = lists |> List.map List.hd in
+      let tails = lists |> List.map List.tl in
+      heads :: uniform_zip tails)
+  ;;
+
   let rec zip l1 l2 =
     if List.length l1 <> List.length l2
     then failwith "cannot zip two lists of unequal length"

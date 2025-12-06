@@ -5,15 +5,15 @@ open! Common
 module M : Solution = struct
   type t = NumberColumn.t list
 
-  let label = "Day 6, Part 1"
+  let label = "Day 6, Part 2"
   let input = "./input/day6/full.txt"
 
   let parse_input input =
     input
     |> String.split_on_char '\n'
     |> ListUtil.remove_lines_shorter_than 1
-    |> List.map RawRow.t_of_string
-    |> NumberColumn.t_list_of_raw_rows
+    |> CephalopodRow.t_of_string_list
+    |> NumberColumn.t_list_of_cephalopod_rows
   ;;
 
   let solver input =
