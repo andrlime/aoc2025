@@ -25,15 +25,7 @@ module IngredientIdRange = struct
   ;;
 
   let compare t1 t2 =
-    if t1.low < t2.low
-    then -1
-    else if t1.low > t2.low
-    then 1
-    else if t1.high < t2.high
-    then -1
-    else if t1.high > t2.high
-    then 1
-    else 0
+    if t1.low = t2.low then compare t1.high t2.high else compare t1.low t2.low
   ;;
 
   let get_range_length t = t.high - t.low |> fun x -> x + 1
