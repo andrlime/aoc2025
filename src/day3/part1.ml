@@ -10,8 +10,7 @@ module M : Solution = struct
 
   let rec get_pair_from_battery_bank curmax curmaxfirst bank =
     match bank with
-    | [] -> curmax
-    | _ :: [] -> curmax
+    | [] | _ :: [] -> curmax
     | first :: rest ->
       if first < curmaxfirst
       then get_pair_from_battery_bank curmax curmaxfirst rest
