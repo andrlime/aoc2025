@@ -128,12 +128,13 @@ module TachyonDpSolver = struct
   ;;
 
   let solve_dp (u : Parser.u) : dpstate =
+    (* Note that as we are solving bottom up, we flip the grid and dp table for convenience *)
     (* Use dp[index + 1] and grid[index] to create dp[index] *)
     (* Invariant: there is a blank row between every row of input *)
     (* Invariant: there is padding around the sides *)
-    (* RR: if nextrow[j] = Splitter then sum(dpnextrow(j-1), dpnextrow(j+1)) *)
-    (*     if nextrow[j] = Empty then fail *)
-    (*     if nextrow[j] = some number then that number *)
+    (* RR: if prevrow[j] = Splitter then sum(dpprevrow(j-1), dpprevrow(j+1)) *)
+    (*     if prevrow[j] = Empty then fail *)
+    (*     if prevrow[j] = some number then that number *)
     (* Return: value at S *)
     (* NOTE: This doesn't do any input sanity checking but it is mathematically correct *)
     let dp = create_dp_table u in
