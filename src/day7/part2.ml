@@ -5,7 +5,7 @@ open! Common
 module M : Solution = struct
   type t = Parser.u
 
-  let label = "Day 7, Part 1"
+  let label = "Day 7, Part 2"
   let input = "./input/day7/full.txt"
 
   let parse_input input =
