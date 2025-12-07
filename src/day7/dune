@@ -1,3 +1,5 @@
 (library
  (name day7)
- (libraries shared))
+ (libraries shared)
+ (preprocess
+  (pps ppx_let)))
