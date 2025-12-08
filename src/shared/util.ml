@@ -170,3 +170,88 @@ module Physics = struct
     | _ -> failwith "cannot compute euclidean distance between two incompatible types"
   ;;
 end
+
+module WeightedGraph = struct
+  (* a = node type (e.g. a coordinate), b = weight type (e.g. float) *)
+  type ('a, 'b) t =
+    { edges : ('a, ('a * 'b) list) Hashtbl.t
+    ; vertices : ('a, unit) Hashtbl.t
+    ; all_edges : ('a * 'a, 'b) Hashtbl.t
+    }
+
+  let create () =
+    { edges = Hashtbl.create 100
+    ; vertices = Hashtbl.create 100
+    ; all_edges = Hashtbl.create 100
+    }
+  ;;
+
+  let add_vertex g v = Hashtbl.add g.vertices v ()
+
+  let add_edge_directed g fromv tov w =
+    if Hashtbl.mem g.all_edges (fromv, tov)
+    then ()
+    else (
+      let cur_edges =
+        match Hashtbl.find_opt g.edges fromv with
+        | Some list -> list
+        | None -> []
+      in
+      Hashtbl.add g.edges fromv ((tov, w) :: cur_edges);
+      Hashtbl.add g.all_edges (fromv, tov) w)
+  ;;
+
+  let add_edge g v1 v2 w =
+    add_vertex g v1;
+    add_vertex g v2;
+    add_edge_directed g v1 v2 w;
+    add_edge_directed g v2 v1 w
+  ;;
+
+  let edge_compare ((v1a, v1b), w1) ((v2a, v2b), w2) =
+    if w1 = w2
+    then if v1a = v2a then compare v1b v2b else compare v1a v2a
+    else compare w1 w2
+  ;;
+end
+
+module UnionFind = struct
+  type 'a t =
+    { vertices : ('a, int) Hashtbl.t
+    ; roots : int array
+    ; mutable nextkey : int
+    ; mutable components : int
+    }
+
+  let create size =
+    let roots = Array.make size 0 in
+    roots |> Array.iteri (fun index _ -> roots.(index) <- index);
+    { vertices = Hashtbl.create size; roots; nextkey = 0; components = size }
+  ;;
+
+  let rec find_wrapper u key =
+    let root = u.roots.(key) in
+    if root = key then key else find_wrapper u root
+  ;;
+
+  let find u a1 =
+    let key = Hashtbl.find_opt u.vertices a1 in
+    match key with
+    | None ->
+      let key = u.nextkey in
+      Hashtbl.add u.vertices a1 key;
+      let res = find_wrapper u key in
+      u.nextkey <- key + 1;
+      res
+    | Some k -> find_wrapper u k
+  ;;
+
+  let union u a1 a2 =
+    let root1 = find u a1 in
+    let root2 = find u a2 in
+    if root1 <> root2
+    then (
+      u.roots.(root1) <- root2;
+      u.components <- u.components - 1)
+  ;;
+end

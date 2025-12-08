@@ -49,3 +49,31 @@ module Physics : sig
   val distance_euclidean : quantity -> quantity -> float
   val distance_taxicab : quantity -> quantity -> int
 end
+
+module WeightedGraph : sig
+  type ('a, 'b) t =
+    { edges : ('a, ('a * 'b) list) Hashtbl.t
+    ; vertices : ('a, unit) Hashtbl.t
+    ; all_edges : ('a * 'a, 'b) Hashtbl.t
+    }
+
+  val create : unit -> ('a, 'b) t
+  val add_vertex : ('a, 'b) t -> 'a -> unit
+  val add_edge_directed : ('a, 'b) t -> 'a -> 'a -> 'b -> unit
+  val add_edge : ('a, 'b) t -> 'a -> 'a -> 'b -> unit
+  val edge_compare : ('a * 'a) * 'b -> ('a * 'a) * 'b -> int
+end
+
+module UnionFind : sig
+  type 'a t =
+    { vertices : ('a, int) Hashtbl.t
+    ; roots : int array
+    ; mutable nextkey : int
+    ; mutable components : int
+    }
+
+  val create : int -> 'a t
+  val find_wrapper : 'a t -> int -> int
+  val find : 'a t -> 'a -> int
+  val union : 'a t -> 'a -> 'a -> unit
+end

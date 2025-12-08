@@ -36,7 +36,7 @@ module M : Solution = struct
     in
     (* Connect 1000 edges *)
     (* Get three largest circuits from the union find and multiply them *)
-    u |> UnionFind.get_product_of_3_greatest_root_sizes |> string_of_int
+    u |> Solver.get_product_of_3_greatest_root_sizes |> string_of_int
   ;;
 end
 
