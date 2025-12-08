@@ -153,6 +153,25 @@ module Physics = struct
     | _ -> failwith "cannot compute euclidean distance between two incompatible types"
   ;;
 
+  let distance_euclidean_squared q1 q2 =
+    match q1, q2 with
+    | Scalar x, Scalar y -> abs x - y
+    | Vector2 { x = x1; y = y1 }, Vector2 { x = x2; y = y2 } ->
+      let dx = x1 - x2 in
+      let dy = y1 - y2 in
+      (dx * dx) + (dy * dy)
+    | Vector3 { x = x1; y = y1; z = z1 }, Vector3 { x = x2; y = y2; z = z2 } ->
+      let dx = x1 - x2 in
+      let dy = y1 - y2 in
+      let dz = z1 - z2 in
+      (dx * dx) + (dy * dy) + (dz * dz)
+    | VectorN list1, VectorN list2 ->
+      ListUtil.zip list1 list2
+      |> List.fold_left (fun acc (x, y) -> acc + ((x - y) * (x - y))) 0
+    | _ ->
+      failwith "cannot compute squared euclidean distance between two incompatible types"
+  ;;
+
   let distance_taxicab q1 q2 =
     match q1, q2 with
     | Scalar x, Scalar y -> abs x - y

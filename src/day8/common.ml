@@ -66,8 +66,8 @@ module Solver = struct
     let g = WeightedGraph.create () in
     ListUtil.cross t t
     |> List.iter (fun (c1, c2) ->
-      let d = Physics.distance_euclidean c1 c2 in
-      if d > 0.
+      let d = Physics.distance_euclidean_squared c1 c2 in
+      if d > 0
       then (
         let fromv, tov = Circuit.get_min_max c1 c2 in
         WeightedGraph.add_edge_directed g fromv tov d));

@@ -47,6 +47,7 @@ module Physics : sig
 
   val dot : quantity -> quantity -> int
   val distance_euclidean : quantity -> quantity -> float
+  val distance_euclidean_squared : quantity -> quantity -> int
   val distance_taxicab : quantity -> quantity -> int
 end
 
