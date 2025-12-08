@@ -23,7 +23,7 @@ module M : Solution = struct
           then
             let open Circuit in
             raise (Result (get_x v1 * get_x v2)));
-        raise (Result 2)
+        failwith "could not connect all components"
       with
       | Result d -> d
     in
