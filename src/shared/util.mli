@@ -15,6 +15,7 @@ module StringUtil : sig
 end
 
 module ListUtil : sig
+  val cross : 'a list -> 'b list -> ('a * 'b) list
   val remove_lines_shorter_than : int -> string list -> string list
   val uniform_zip : 'a list list -> 'a list list
   val zip : 'a list -> 'b list -> ('a * 'b) list

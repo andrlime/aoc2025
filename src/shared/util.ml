@@ -45,6 +45,14 @@ module StringUtil = struct
 end
 
 module ListUtil = struct
+  let cross l1 l2 =
+    l1
+    |> List.fold_left
+         (fun acc1 c1 ->
+            (l2 |> List.fold_left (fun acc2 c2 -> (c1, c2) :: acc2) []) @ acc1)
+         []
+  ;;
+
   let remove_lines_shorter_than length list =
     list |> List.filter_map (fun l -> if String.length l < length then None else Some l)
   ;;
