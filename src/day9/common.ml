@@ -87,8 +87,6 @@ module RedGreenSolver = struct
     ; coordinates : SimpleSolver.t
     ; compressed_x_mapping : (int, int) Hashtbl.t
     ; compressed_y_mapping : (int, int) Hashtbl.t
-    ; mutable x_nextkey : int
-    ; mutable y_nextkey : int
     ; size : int
     }
 
@@ -122,8 +120,6 @@ module RedGreenSolver = struct
     ; coordinates
     ; compressed_x_mapping = xhashset
     ; compressed_y_mapping = yhashset
-    ; x_nextkey = 1
-    ; y_nextkey = 1
     ; size
     }
   ;;
