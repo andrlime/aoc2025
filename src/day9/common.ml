@@ -23,6 +23,16 @@ module Coordinate = struct
     | _ -> failwith "unsupported type"
   ;;
 
+  let get_x = function
+    | Physics.Vector2 { x; _ } -> x
+    | _ -> failwith "unsupported type"
+  ;;
+
+  let get_y = function
+    | Physics.Vector2 { y; _ } -> y
+    | _ -> failwith "unsupported type"
+  ;;
+
   let get_x_y = function
     | Physics.Vector2 { x; y } -> x, y
     | _ -> failwith "unsupported type"
@@ -82,17 +92,36 @@ module RedGreenSolver = struct
     ; size : int
     }
 
+  let create_hashset coordinates lambda =
+    let nextkey = ref 1 in
+    let mapping = Hashtbl.create 50 in
+    coordinates
+    |> List.map lambda
+    |> List.sort Int.compare
+    |> List.iter (fun x0 ->
+      let curmapping = Hashtbl.find_opt mapping x0 in
+      match curmapping with
+      | Some _ -> ()
+      | None ->
+        let key = !nextkey in
+        nextkey := key + 2;
+        Hashtbl.add mapping x0 key);
+    mapping, !nextkey
+  ;;
+
   let create coordinates =
     (* Invariant:
       Input has at most 500 entries, at most 250 unique x and 250 unique y after deduping.
       To account for holes between entries, each x is separated from the next by a hole of size 1
       Thus, the array is 500x500
     *)
-    let size = 500 in
+    let xhashset, xmaxkey = create_hashset coordinates Coordinate.get_x in
+    let yhashset, ymaxkey = create_hashset coordinates Coordinate.get_y in
+    let size = if xmaxkey > ymaxkey then xmaxkey else ymaxkey in
     { grid = Array.make_matrix size size UnvisitedUnfilled
     ; coordinates
-    ; compressed_x_mapping = Hashtbl.create size
-    ; compressed_y_mapping = Hashtbl.create size
+    ; compressed_x_mapping = xhashset
+    ; compressed_y_mapping = yhashset
     ; x_nextkey = 1
     ; y_nextkey = 1
     ; size
@@ -109,38 +138,6 @@ module RedGreenSolver = struct
     compressed_x, compressed_y
   ;;
 
-  let create_x_hashset t =
-    t.coordinates
-    |> List.map (fun c ->
-      let x, _ = Coordinate.get_x_y c in
-      x)
-    |> List.sort Int.compare
-    |> List.iter (fun x0 ->
-      let curmapping = Hashtbl.find_opt t.compressed_x_mapping x0 in
-      match curmapping with
-      | Some _ -> ()
-      | None ->
-        let key = t.x_nextkey in
-        t.x_nextkey <- key + 2;
-        Hashtbl.add t.compressed_x_mapping x0 key)
-  ;;
-
-  let create_y_hashset t =
-    t.coordinates
-    |> List.map (fun c ->
-      let _, y = Coordinate.get_x_y c in
-      y)
-    |> List.sort Int.compare
-    |> List.iter (fun y0 ->
-      let curmapping = Hashtbl.find_opt t.compressed_y_mapping y0 in
-      match curmapping with
-      | Some _ -> ()
-      | None ->
-        let key = t.y_nextkey in
-        t.y_nextkey <- key + 2;
-        Hashtbl.add t.compressed_y_mapping y0 key)
-  ;;
-
   let add_single_edge t prev cur =
     let xprev, yprev = get_compressed_x_y t prev in
     let xcur, ycur = get_compressed_x_y t cur in
@@ -152,8 +149,6 @@ module RedGreenSolver = struct
   ;;
 
   let add_all_edges t =
-    create_x_hashset t;
-    create_y_hashset t;
     let firstnode = List.hd t.coordinates in
     t.coordinates
     |> List.fold_left
