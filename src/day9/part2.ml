@@ -15,6 +15,7 @@ module M : Solution = struct
     |> RedGreenSolver.add_all_edges
     |> RedGreenSolver.flood_fill ~start:(0, 0)
     |> RedGreenSolver.binarise_grid
+    |> RedGreenSolver.build_prefix_sum
     |> RedGreenSolver.find_largest_area
     |> string_of_int
   ;;

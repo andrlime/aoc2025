@@ -13,6 +13,8 @@ module Coordinate = struct
       Some (Physics.Vector2 { x; y }))
   ;;
 
+  let make x y = Physics.Vector2 { x; y }
+
   let print = function
     | Physics.Vector2 { x; y } -> Printf.printf "Coordinate at (%d, %d)\n" x y
     | _ -> failwith "unsupported type"
@@ -84,6 +86,7 @@ module RedGreenSolver = struct
 
   type t =
     { mutable grid : tile array array
+    ; prefix : int array array
     ; coordinates : SimpleSolver.t
     ; compressed_x_mapping : (int, int) Hashtbl.t
     ; compressed_y_mapping : (int, int) Hashtbl.t
@@ -117,6 +120,7 @@ module RedGreenSolver = struct
     let yhashset, ymaxkey = create_hashset coordinates Coordinate.get_y in
     let size = if xmaxkey > ymaxkey then xmaxkey else ymaxkey in
     { grid = Array.make_matrix size size UnvisitedUnfilled
+    ; prefix = Array.make_matrix size size 0
     ; coordinates
     ; compressed_x_mapping = xhashset
     ; compressed_y_mapping = yhashset
@@ -157,32 +161,20 @@ module RedGreenSolver = struct
     t
   ;;
 
-  let is_horizontal_edge_valid t (y1, y2) (x1, x2) =
-    let range = ListUtil.range x1 x2 in
-    range
-    |> List.fold_left
-         (fun result xcur ->
-            result && get_grid t xcur y1 = Filled && get_grid t xcur y2 = Filled)
-         true
-  ;;
-
-  let is_vertical_edge_valid t (x1, x2) (y1, y2) =
-    let range = ListUtil.range y1 y2 in
-    range
-    |> List.fold_left
-         (fun result ycur ->
-            result && get_grid t x1 ycur = Filled && get_grid t x2 ycur = Filled)
-         true
-  ;;
-
   let compute_area t c1 c2 =
     let x1, y1 = get_compressed_x_y t c1 in
     let x2, y2 = get_compressed_x_y t c2 in
     let xmin, xmax = if x1 < x2 then x1, x2 else x2, x1 in
     let ymin, ymax = if y1 < y2 then y1, y2 else y2, y1 in
-    let horizontal_ok = is_horizontal_edge_valid t (ymin, ymax) (xmin, xmax) in
-    let vertical_ok = is_vertical_edge_valid t (xmin, xmax) (ymin, ymax) in
-    if horizontal_ok && vertical_ok then Some (Coordinate.compute_area c1 c2) else None
+    let real_area = Coordinate.compute_area c1 c2 in
+    let compressed_area = Coordinate.(compute_area (make xmin ymin) (make xmax ymax)) in
+    let prefix_sum_area =
+      t.prefix.(xmax).(ymax)
+      - t.prefix.(xmin - 1).(ymax)
+      - t.prefix.(xmax).(ymin - 1)
+      + t.prefix.(xmin - 1).(ymin - 1)
+    in
+    if prefix_sum_area = compressed_area then Some real_area else None
   ;;
 
   let rec flood_fill ~start t =
@@ -210,6 +202,19 @@ module RedGreenSolver = struct
         | _ -> Filled)
     in
     t.grid <- newgrid;
+    t
+  ;;
+
+  let build_prefix_sum t =
+    t.grid
+    |> Array.iteri (fun r row ->
+      row
+      |> Array.iteri (fun c col ->
+        let cell = if col = Filled then 1 else 0 in
+        let up = if r > 0 then t.prefix.(r - 1).(c) else 0 in
+        let left = if c > 0 then t.prefix.(r).(c - 1) else 0 in
+        let diag = if r > 0 && c > 0 then t.prefix.(r - 1).(c - 1) else 0 in
+        t.prefix.(r).(c) <- cell + up + left - diag));
     t
   ;;
 
