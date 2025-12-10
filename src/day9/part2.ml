@@ -10,6 +10,7 @@ module M : Solution = struct
   let parse_input input = input |> SimpleSolver.t_of_input_string
 
   let solver input =
+    Gc.set { (Gc.get ()) with minor_heap_size = 128 * 1024 * 1024; space_overhead = 500 };
     input
     |> RedGreenSolver.create
     |> RedGreenSolver.add_all_edges
