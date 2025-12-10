@@ -99,6 +99,9 @@ module RedGreenSolver = struct
     }
   ;;
 
+  let get_grid t x y = t.grid.(x).(y)
+  let set_grid t x y thing = t.grid.(x).(y) <- thing
+
   let get_compressed_x_y t c =
     let rawx, rawy = Coordinate.get_x_y c in
     let compressed_x = Hashtbl.find t.compressed_x_mapping rawx in
@@ -145,7 +148,7 @@ module RedGreenSolver = struct
     let ymin, ymax = if yprev < ycur then yprev, ycur else ycur, yprev in
     let xrange = ListUtil.range xmin xmax in
     let yrange = ListUtil.range ymin ymax in
-    ListUtil.cross xrange yrange |> List.iter (fun (x, y) -> t.grid.(x).(y) <- Filled)
+    ListUtil.cross xrange yrange |> List.iter (fun (x, y) -> set_grid t x y Filled)
   ;;
 
   let add_all_edges t =
@@ -163,14 +166,22 @@ module RedGreenSolver = struct
     t
   ;;
 
-  let is_horizontal_edge_valid t y (x1, x2) =
+  let is_horizontal_edge_valid t (y1, y2) (x1, x2) =
     let range = ListUtil.range x1 x2 in
-    range |> List.fold_left (fun result xcur -> result && t.grid.(xcur).(y) = Filled) true
+    range
+    |> List.fold_left
+         (fun result xcur ->
+            result && get_grid t xcur y1 = Filled && get_grid t xcur y2 = Filled)
+         true
   ;;
 
-  let is_vertical_edge_valid t x (y1, y2) =
+  let is_vertical_edge_valid t (x1, x2) (y1, y2) =
     let range = ListUtil.range y1 y2 in
-    range |> List.fold_left (fun result ycur -> result && t.grid.(x).(ycur) = Filled) true
+    range
+    |> List.fold_left
+         (fun result ycur ->
+            result && get_grid t x1 ycur = Filled && get_grid t x2 ycur = Filled)
+         true
   ;;
 
   let compute_area t c1 c2 =
@@ -178,31 +189,24 @@ module RedGreenSolver = struct
     let x2, y2 = get_compressed_x_y t c2 in
     let xmin, xmax = if x1 < x2 then x1, x2 else x2, x1 in
     let ymin, ymax = if y1 < y2 then y1, y2 else y2, y1 in
-    let top = is_horizontal_edge_valid t ymin (xmin, xmax) in
-    let bottom = is_horizontal_edge_valid t ymax (xmin, xmax) in
-    let left = is_vertical_edge_valid t xmin (ymin, ymax) in
-    let right = is_vertical_edge_valid t xmax (ymin, ymax) in
-    let valid = top && bottom && left && right in
-    if valid then Some (Coordinate.compute_area c1 c2) else None
+    let horizontal_ok = is_horizontal_edge_valid t (ymin, ymax) (xmin, xmax) in
+    let vertical_ok = is_vertical_edge_valid t (xmin, xmax) (ymin, ymax) in
+    if horizontal_ok && vertical_ok then Some (Coordinate.compute_area c1 c2) else None
   ;;
 
   let rec flood_fill ~start t =
+    let is_out_of_range num = num < 0 || num >= t.size in
     let x0, y0 = start in
-    let empty_neighbors =
-      Neighbors.neighbors_2d
-      |> List.filter_map (fun (x, y) ->
-        let x1, y1 = x + x0, y + y0 in
-        if x1 < 0 || y1 < 0
-        then None
-        else if x1 >= t.size || y1 >= t.size
-        then None
-        else if t.grid.(x1).(y1) != UnvisitedUnfilled
-        then None
-        else Some (x1, y1))
-    in
-    empty_neighbors
+    Neighbors.neighbors_2d
+    |> List.filter_map (fun (dx, dy) ->
+      let x1, y1 = x0 + dx, y0 + dy in
+      if is_out_of_range x1 || is_out_of_range y1
+      then None
+      else if get_grid t x1 y1 != UnvisitedUnfilled
+      then None
+      else Some (x1, y1))
     |> List.iter (fun (xn, yn) ->
-      t.grid.(xn).(yn) <- VisitedUnfilled;
+      set_grid t xn yn VisitedUnfilled;
       flood_fill ~start:(xn, yn) t |> ignore);
     t
   ;;
