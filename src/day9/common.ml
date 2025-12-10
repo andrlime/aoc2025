@@ -39,15 +39,6 @@ module Coordinate = struct
     let x2, y2 = get_x_y c2 in
     (abs (x1 - x2) + 1) * (abs (y1 - y2) + 1)
   ;;
-
-  let ( - ) c1 c2 =
-    let normalise n = if n = 0 then 0 else if n > 0 then 1 else -1 in
-    let x1, y1 = get_x_y c1 in
-    let x2, y2 = get_x_y c2 in
-    let x = normalise (x1 - x2) |> abs in
-    let y = normalise (y1 - y2) |> abs in
-    x, y
-  ;;
 end
 
 module SimpleSolver = struct
@@ -91,15 +82,13 @@ module RedGreenSolver = struct
     ; size : int
     }
 
-  type rawcoordinate = int * int
-
-  type edge =
-    | HorizontalEdge of rawcoordinate * rawcoordinate
-    | VerticalEdge of rawcoordinate * rawcoordinate
-
   let create coordinates =
+    (* Invariant:
+      Input has at most 500 entries, at most 250 unique x and 250 unique y after deduping.
+      To account for holes between entries, each x is separated from the next by a hole of size 1
+      Thus, the array is 500x500
+    *)
     let size = 500 in
-    (* Invariant: Input has at 500 entries, at most 500 unique x and 500 unique y. *)
     { grid = Array.make_matrix size size UnvisitedUnfilled
     ; coordinates
     ; compressed_x_mapping = Hashtbl.create size
@@ -189,11 +178,11 @@ module RedGreenSolver = struct
     let x2, y2 = get_compressed_x_y t c2 in
     let xmin, xmax = if x1 < x2 then x1, x2 else x2, x1 in
     let ymin, ymax = if y1 < y2 then y1, y2 else y2, y1 in
-    let topedge_valid = is_horizontal_edge_valid t ymin (xmin, xmax) in
-    let bottomedge_valid = is_horizontal_edge_valid t ymax (xmin, xmax) in
-    let leftedge_valid = is_vertical_edge_valid t xmin (ymin, ymax) in
-    let rightedge_valid = is_vertical_edge_valid t xmax (ymin, ymax) in
-    let valid = topedge_valid && bottomedge_valid && leftedge_valid && rightedge_valid in
+    let top = is_horizontal_edge_valid t ymin (xmin, xmax) in
+    let bottom = is_horizontal_edge_valid t ymax (xmin, xmax) in
+    let left = is_vertical_edge_valid t xmin (ymin, ymax) in
+    let right = is_vertical_edge_valid t xmax (ymin, ymax) in
+    let valid = top && bottom && left && right in
     if valid then Some (Coordinate.compute_area c1 c2) else None
   ;;
 
@@ -203,7 +192,9 @@ module RedGreenSolver = struct
       Neighbors.neighbors_2d
       |> List.filter_map (fun (x, y) ->
         let x1, y1 = x + x0, y + y0 in
-        if x1 < 0 || y1 < 0 || x1 >= t.size || y1 >= t.size
+        if x1 < 0 || y1 < 0
+        then None
+        else if x1 >= t.size || y1 >= t.size
         then None
         else if t.grid.(x1).(y1) != UnvisitedUnfilled
         then None
@@ -220,21 +211,17 @@ module RedGreenSolver = struct
     let newgrid =
       t.grid
       |> ArrayUtil.map2d (function
-        | UnvisitedUnfilled -> Filled
-        | Filled -> Filled
-        | VisitedUnfilled -> VisitedUnfilled)
+        | VisitedUnfilled -> VisitedUnfilled
+        | _ -> Filled)
     in
     t.grid <- newgrid;
     t
   ;;
 
   let find_largest_area t =
-    let counter = ref 0 in
-    let all_pairs = ListUtil.cross t.coordinates t.coordinates in
-    all_pairs
+    ListUtil.cross t.coordinates t.coordinates
     |> List.fold_left
          (fun acc (c1, c2) ->
-            counter := !counter + 1;
             let newarea = compute_area t c1 c2 in
             match newarea with
             | None -> acc
