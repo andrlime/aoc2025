@@ -39,9 +39,18 @@ module Coordinate = struct
     let x2, y2 = get_x_y c2 in
     (abs (x1 - x2) + 1) * (abs (y1 - y2) + 1)
   ;;
+
+  let ( - ) c1 c2 =
+    let normalise n = if n = 0 then 0 else if n > 0 then 1 else -1 in
+    let x1, y1 = get_x_y c1 in
+    let x2, y2 = get_x_y c2 in
+    let x = normalise (x1 - x2) |> abs in
+    let y = normalise (y1 - y2) |> abs in
+    x, y
+  ;;
 end
 
-module Solver = struct
+module SimpleSolver = struct
   type t = Coordinate.t list
 
   let t_of_input_string s =
@@ -62,6 +71,174 @@ module Solver = struct
          (fun acc (c1, c2) ->
             let newarea = Coordinate.compute_area c1 c2 in
             if newarea > acc then newarea else acc)
+         0
+  ;;
+end
+
+module RedGreenSolver = struct
+  type tile =
+    | VisitedUnfilled
+    | UnvisitedUnfilled
+    | Filled
+
+  type t =
+    { mutable grid : tile array array
+    ; coordinates : SimpleSolver.t
+    ; compressed_x_mapping : (int, int) Hashtbl.t
+    ; compressed_y_mapping : (int, int) Hashtbl.t
+    ; mutable x_nextkey : int
+    ; mutable y_nextkey : int
+    ; size : int
+    }
+
+  type rawcoordinate = int * int
+
+  type edge =
+    | HorizontalEdge of rawcoordinate * rawcoordinate
+    | VerticalEdge of rawcoordinate * rawcoordinate
+
+  let create coordinates =
+    let size = 500 in
+    (* Invariant: Input has at 500 entries, at most 500 unique x and 500 unique y. *)
+    { grid = Array.make_matrix size size UnvisitedUnfilled
+    ; coordinates
+    ; compressed_x_mapping = Hashtbl.create size
+    ; compressed_y_mapping = Hashtbl.create size
+    ; x_nextkey = 1
+    ; y_nextkey = 1
+    ; size
+    }
+  ;;
+
+  let get_compressed_x_y t c =
+    let rawx, rawy = Coordinate.get_x_y c in
+    let compressed_x = Hashtbl.find t.compressed_x_mapping rawx in
+    let compressed_y = Hashtbl.find t.compressed_y_mapping rawy in
+    compressed_x, compressed_y
+  ;;
+
+  let create_x_hashset t =
+    t.coordinates
+    |> List.map (fun c ->
+      let x, _ = Coordinate.get_x_y c in
+      x)
+    |> List.sort Int.compare
+    |> List.iter (fun x0 ->
+      let curmapping = Hashtbl.find_opt t.compressed_x_mapping x0 in
+      match curmapping with
+      | Some _ -> ()
+      | None ->
+        let key = t.x_nextkey in
+        t.x_nextkey <- key + 2;
+        Hashtbl.add t.compressed_x_mapping x0 key)
+  ;;
+
+  let create_y_hashset t =
+    t.coordinates
+    |> List.map (fun c ->
+      let _, y = Coordinate.get_x_y c in
+      y)
+    |> List.sort Int.compare
+    |> List.iter (fun y0 ->
+      let curmapping = Hashtbl.find_opt t.compressed_y_mapping y0 in
+      match curmapping with
+      | Some _ -> ()
+      | None ->
+        let key = t.y_nextkey in
+        t.y_nextkey <- key + 2;
+        Hashtbl.add t.compressed_y_mapping y0 key)
+  ;;
+
+  let add_single_edge t prev cur =
+    let xprev, yprev = get_compressed_x_y t prev in
+    let xcur, ycur = get_compressed_x_y t cur in
+    let xmin, xmax = if xprev < xcur then xprev, xcur else xcur, xprev in
+    let ymin, ymax = if yprev < ycur then yprev, ycur else ycur, yprev in
+    let xrange = ListUtil.range xmin xmax in
+    let yrange = ListUtil.range ymin ymax in
+    ListUtil.cross xrange yrange |> List.iter (fun (x, y) -> t.grid.(x).(y) <- Filled)
+  ;;
+
+  let add_all_edges t =
+    create_x_hashset t;
+    create_y_hashset t;
+    let firstnode = List.hd t.coordinates in
+    t.coordinates
+    |> List.fold_left
+         (fun prevnode curnode ->
+            add_single_edge t prevnode curnode;
+            curnode)
+         firstnode
+    |> fun lastnode ->
+    add_single_edge t lastnode firstnode;
+    t
+  ;;
+
+  let is_horizontal_edge_valid t y (x1, x2) =
+    let range = ListUtil.range x1 x2 in
+    range |> List.fold_left (fun result xcur -> result && t.grid.(xcur).(y) = Filled) true
+  ;;
+
+  let is_vertical_edge_valid t x (y1, y2) =
+    let range = ListUtil.range y1 y2 in
+    range |> List.fold_left (fun result ycur -> result && t.grid.(x).(ycur) = Filled) true
+  ;;
+
+  let compute_area t c1 c2 =
+    let x1, y1 = get_compressed_x_y t c1 in
+    let x2, y2 = get_compressed_x_y t c2 in
+    let xmin, xmax = if x1 < x2 then x1, x2 else x2, x1 in
+    let ymin, ymax = if y1 < y2 then y1, y2 else y2, y1 in
+    let topedge_valid = is_horizontal_edge_valid t ymin (xmin, xmax) in
+    let bottomedge_valid = is_horizontal_edge_valid t ymax (xmin, xmax) in
+    let leftedge_valid = is_vertical_edge_valid t xmin (ymin, ymax) in
+    let rightedge_valid = is_vertical_edge_valid t xmax (ymin, ymax) in
+    let valid = topedge_valid && bottomedge_valid && leftedge_valid && rightedge_valid in
+    if valid then Some (Coordinate.compute_area c1 c2) else None
+  ;;
+
+  let rec flood_fill ~start t =
+    let x0, y0 = start in
+    let empty_neighbors =
+      Neighbors.neighbors_2d
+      |> List.filter_map (fun (x, y) ->
+        let x1, y1 = x + x0, y + y0 in
+        if x1 < 0 || y1 < 0 || x1 >= t.size || y1 >= t.size
+        then None
+        else if t.grid.(x1).(y1) != UnvisitedUnfilled
+        then None
+        else Some (x1, y1))
+    in
+    empty_neighbors
+    |> List.iter (fun (xn, yn) ->
+      t.grid.(xn).(yn) <- VisitedUnfilled;
+      flood_fill ~start:(xn, yn) t |> ignore);
+    t
+  ;;
+
+  let binarise_grid t =
+    let newgrid =
+      t.grid
+      |> ArrayUtil.map2d (function
+        | UnvisitedUnfilled -> Filled
+        | Filled -> Filled
+        | VisitedUnfilled -> VisitedUnfilled)
+    in
+    t.grid <- newgrid;
+    t
+  ;;
+
+  let find_largest_area t =
+    let counter = ref 0 in
+    let all_pairs = ListUtil.cross t.coordinates t.coordinates in
+    all_pairs
+    |> List.fold_left
+         (fun acc (c1, c2) ->
+            counter := !counter + 1;
+            let newarea = compute_area t c1 c2 in
+            match newarea with
+            | None -> acc
+            | Some a -> if a > acc then a else acc)
          0
   ;;
 end

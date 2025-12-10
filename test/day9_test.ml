@@ -5,7 +5,7 @@ let%expect_test "day9 part1" =
   [%expect {| 4758121828 |}]
 ;;
 
-(* let%expect_test "day9 part2" =
+let%expect_test "day9 part2" =
   get_solution_string "9b" |> print_endline;
-  [%expect {| |}]
-;; *)
+  [%expect {| 1577956170 |}]
+;;
