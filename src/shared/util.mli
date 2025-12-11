@@ -61,6 +61,7 @@ module WeightedGraph : sig
   val create : unit -> ('a, 'b) t
   val add_vertex : ('a, 'b) t -> 'a -> unit
   val add_edge_directed : ('a, 'b) t -> 'a -> 'a -> 'b -> unit
+  val add_unweighted_edge_directed : ('a, int) t -> 'a -> 'a -> unit
   val add_edge : ('a, 'b) t -> 'a -> 'a -> 'b -> unit
   val edge_compare : ('a * 'a) * 'b -> ('a * 'a) * 'b -> int
 end

@@ -220,6 +220,12 @@ module WeightedGraph = struct
       Hashtbl.add g.all_edges (fromv, tov) w)
   ;;
 
+  let add_unweighted_edge_directed g fromv tov =
+    add_vertex g fromv;
+    add_vertex g tov;
+    add_edge_directed g fromv tov 1
+  ;;
+
   let add_edge g v1 v2 w =
     add_vertex g v1;
     add_vertex g v2;
