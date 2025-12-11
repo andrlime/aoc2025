@@ -77,7 +77,11 @@ module ElfMachine = struct
   ;;
 
   let joltage_of_string s =
-    strip_string s |> String.split_on_char ',' |> List.map int_of_string |> Array.of_list
+    strip_string s
+    |> String.split_on_char ','
+    |> List.rev
+    |> List.map int_of_string
+    |> Array.of_list
   ;;
 
   let t_of_string s =
@@ -127,4 +131,8 @@ module ElfMachine = struct
             if result = t.lights.value && count < minimum then count else minimum)
          64
   ;;
+end
+
+module AStarSolver = struct
+  type t = ElfMachine.t
 end

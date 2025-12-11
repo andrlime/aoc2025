@@ -12,4 +12,4 @@ module type T = sig
   val get_soln_string : unit -> string
 end
 
-module Make (_ : Solution) : T
+module Make : functor (_ : Solution) -> T
