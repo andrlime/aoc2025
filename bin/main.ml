@@ -1,5 +1,5 @@
 let () =
-  (* NOTE: This reduces runtime by 50% by cutting the probability of gc latency spikes *)
+  (* NOTE: This reduces runtime by a lot by cutting the probability of gc latency spikes *)
   Gc.set { (Gc.get ()) with minor_heap_size = 128 * 1024 * 1024; space_overhead = 500 };
   let argv = Sys.argv in
   if Array.length argv = 1
