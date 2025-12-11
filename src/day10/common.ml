@@ -104,8 +104,18 @@ module ElfMachine = struct
     Array.of_list [ 1; 2; 4; 8; 16; 32; 64; 128; 256; 512; 1024; 2048; 4096; 8192 ]
   ;;
 
-  let get_minimum_solution t =
-    (* Enumerate all subsets, find minimum. Maximum search space is 1024, each search is O(n) to find sum/xor *)
+  let get_result_for_bitmask_binary t bitmask =
+    let open Bitmask in
+    t.schematics
+    |> List.fold_left
+         (fun (xorresult, count, index) schematic ->
+            if get_nth_bit bitmask index
+            then schematic.value lxor xorresult, count + 1, index + 1
+            else xorresult, count, index + 1)
+         (0, 0, 0)
+  ;;
+
+  let get_minimum_solution_binary t =
     let open Bitmask in
     let numschematics = List.length t.schematics in
     let searchspace_bitmasks = ListUtil.range 0 (pows.(numschematics) - 1) in
@@ -113,19 +123,8 @@ module ElfMachine = struct
     |> List.fold_left
          (fun minimum bm ->
             let bitmask = t_of_int bm in
-            let result, count =
-              t.schematics
-              |> List.fold_left
-                   (fun (xorresult, count, index) schematic ->
-                      if get_nth_bit bitmask index
-                      then schematic.value lxor xorresult, count + 1, index + 1
-                      else xorresult, count, index + 1)
-                   (0, 0, 0)
-              |> fun (r, c, _) -> r, c
-            in
-            if result = t.lights.value
-            then if count < minimum then count else minimum
-            else minimum)
+            let result, count, _ = get_result_for_bitmask_binary t bitmask in
+            if result = t.lights.value && count < minimum then count else minimum)
          64
   ;;
 end

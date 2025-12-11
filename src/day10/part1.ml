@@ -16,7 +16,10 @@ module M : Solution = struct
   ;;
 
   let solver input =
-    input |> List.map ElfMachine.get_minimum_solution |> ListUtil.intsum |> string_of_int
+    input
+    |> List.map ElfMachine.get_minimum_solution_binary
+    |> ListUtil.intsum
+    |> string_of_int
   ;;
 end
 
