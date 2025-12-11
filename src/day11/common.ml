@@ -25,7 +25,6 @@ module Visitability = struct
 
   let mk g =
     let open WeightedGraph in
-    (* Algorithm: for each v in g, dfs to all possible neighbors, and store into visitable *)
     let newt = { graph = g; visitable = Hashtbl.create 100 } in
     let allv = g.vertices |> Hashtbl.to_seq |> List.of_seq in
     allv
@@ -67,12 +66,12 @@ module PathCounterSolver = struct
     | Some n -> n
   ;;
 
-  let rec dfs_graph t cur dst ~order =
+  let rec dfs_graph t cur dst =
     if cur = dst
     then t.counter <- t.counter + 1
     else (
       let neighbors = get_neighbors t cur in
-      neighbors |> List.iter (fun (n, _) -> dfs_graph t n dst ~order:(n :: order)))
+      neighbors |> List.iter (fun (n, _) -> dfs_graph t n dst))
   ;;
 
   let dfs_graph_and_visit t src dst =
@@ -82,7 +81,7 @@ module PathCounterSolver = struct
       let visitable_from_n = Hashtbl.find Visitability.(v.visitable) n in
       Hashtbl.mem visitable_from_n node
     in
-    let rec loop cur ~order ~path =
+    let rec loop cur ~path =
       if cur = dst
       then t.counter <- t.counter + 1
       else (
@@ -91,10 +90,9 @@ module PathCounterSolver = struct
         |> List.iter (fun (n, _) ->
           let notcycle = not (has_visited n ~path) in
           let canreach = can_still_visit dst ~from:n in
-          if notcycle && canreach
-          then loop n ~order:(n :: order) ~path:(StringSet.add n path)))
+          if notcycle && canreach then loop n ~path:(StringSet.add n path)))
     in
-    loop src ~order:[ src ] ~path:(StringSet.add src StringSet.empty);
+    loop src ~path:(StringSet.add src StringSet.empty);
     let rval = t.counter in
     t.counter <- 0;
     rval

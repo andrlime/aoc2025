@@ -140,25 +140,23 @@ module ILPSolver = struct
     context, optimiser
   ;;
 
-  let solve t =
-    let open ElfMachine in
-    let open Bitmask in
-    let context, optimiser = create_z3_state () in
-    let xs =
-      ListUtil.range 0 (List.length t.schematics)
-      |> List.map (fun index ->
-        Arithmetic.Integer.mk_const_s context (Printf.sprintf "x%d" index))
-    in
-    (* Constraint 1: All x >= 0 *)
+  let create_xs ~num context =
+    ListUtil.range 0 num
+    |> List.map (fun index ->
+      Arithmetic.Integer.mk_const_s context (Printf.sprintf "x%d" index))
+  ;;
+
+  let all_x_positive ~xs context =
     xs
     |> List.map (fun v ->
       Arithmetic.mk_ge context v (Arithmetic.Integer.mk_numeral_i context 0))
-    |> Optimize.add optimiser
-    |> ignore;
-    (* Constraint 2: Linear combination == target *)
+  ;;
+
+  let target_constraint t context ~xs =
+    let open ElfMachine in
+    let open Bitmask in
     t.joltage
     |> Array.mapi (fun index target ->
-      (* index is the index of the joltage array, which is needed when querying the other arrays *)
       let variables =
         t.schematics
         |> List.mapi (fun varnumber schemat ->
@@ -172,20 +170,27 @@ module ILPSolver = struct
     |> Array.to_list
     |> List.map (fun (constr, target) ->
       Boolean.mk_eq context constr (Arithmetic.Integer.mk_numeral_i context target))
-    |> Optimize.add optimiser
-    |> ignore;
-    (* Objective: Minimise sum of x *)
-    xs |> Arithmetic.mk_add context |> Optimize.minimize optimiser |> ignore;
-    (* Solve *)
+  ;;
+
+  let minimise_sum_of_xs ~xs context optimiser =
+    xs |> Arithmetic.mk_add context |> Optimize.minimize optimiser
+  ;;
+
+  let solve t =
+    let open ElfMachine in
+    let context, optimiser = create_z3_state () in
+    let numvars = List.length t.schematics - 1 in
+    let xs = create_xs ~num:numvars context in
+    all_x_positive ~xs context |> Optimize.add optimiser;
+    target_constraint t context ~xs |> Optimize.add optimiser;
+    minimise_sum_of_xs ~xs context optimiser |> ignore;
     match Optimize.check optimiser with
     | Solver.SATISFIABLE ->
       let model = Optimize.get_model optimiser |> Option.get in
-      let values =
-        xs
-        |> List.map (fun x ->
-          Model.eval model x true |> Option.get |> Expr.to_string |> int_of_string)
-      in
-      values |> List.fold_left ( + ) 0
+      xs
+      |> List.map (fun x ->
+        Model.eval model x true |> Option.get |> Expr.to_string |> int_of_string)
+      |> List.fold_left ( + ) 0
     | _ -> failwith "unsat"
   ;;
 end

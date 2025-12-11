@@ -16,7 +16,7 @@ module M : Solution = struct
   ;;
 
   let solver input =
-    PathCounterSolver.dfs_graph input "you" "out" ~order:[ "you" ];
+    PathCounterSolver.dfs_graph input "you" "out";
     input.counter |> string_of_int
   ;;
 end
