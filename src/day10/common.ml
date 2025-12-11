@@ -9,13 +9,11 @@ module Bitmask = struct
   let get_nth_bit t n = (t.value lsr n) land 1 = 1
 
   let t_of_bit_list bits =
-    (* [1 ; 0 ; 1 ; 0 ; 1 ; 1] -> 0b101011 *)
     let value = bits |> List.fold_left (fun acc bit -> (acc lsl 1) lor bit) 0 in
     { value; bits }
   ;;
 
   let t_of_bit_indexes indexes =
-    (* [1 ; 0 ; 1 ; 0 ; 1 ; 1] -> 0b101011 *)
     let bits_rev = Array.make 16 0 in
     let value =
       indexes
@@ -77,11 +75,7 @@ module ElfMachine = struct
   ;;
 
   let joltage_of_string s =
-    strip_string s
-    |> String.split_on_char ','
-    |> List.rev
-    |> List.map int_of_string
-    |> Array.of_list
+    strip_string s |> String.split_on_char ',' |> List.map int_of_string |> Array.of_list
   ;;
 
   let t_of_string s =
@@ -133,6 +127,65 @@ module ElfMachine = struct
   ;;
 end
 
-module AStarSolver = struct
+module ILPSolver = struct
+  open Z3
+
   type t = ElfMachine.t
+  type z = Z3.context * Z3.Optimize.optimize
+
+  let create_z3_state () =
+    let config = [ "model", "true"; "proof", "false" ] in
+    let context = mk_context config in
+    let optimiser = Optimize.mk_opt context in
+    context, optimiser
+  ;;
+
+  let solve t =
+    let open ElfMachine in
+    let open Bitmask in
+    let context, optimiser = create_z3_state () in
+    let xs =
+      ListUtil.range 0 (List.length t.schematics)
+      |> List.map (fun index ->
+        Arithmetic.Integer.mk_const_s context (Printf.sprintf "x%d" index))
+    in
+    (* Constraint 1: All x >= 0 *)
+    xs
+    |> List.map (fun v ->
+      Arithmetic.mk_ge context v (Arithmetic.Integer.mk_numeral_i context 0))
+    |> Optimize.add optimiser
+    |> ignore;
+    (* Constraint 2: Linear combination == target *)
+    t.joltage
+    |> Array.mapi (fun index target ->
+      (* index is the index of the joltage array, which is needed when querying the other arrays *)
+      let variables =
+        t.schematics
+        |> List.mapi (fun varnumber schemat ->
+          if get_nth_bit schemat index then Some varnumber else None)
+        |> List.filter_map (fun varopt ->
+          match varopt with
+          | Some n -> Some (List.nth xs n)
+          | None -> None)
+      in
+      Arithmetic.mk_add context variables, target)
+    |> Array.to_list
+    |> List.map (fun (constr, target) ->
+      Boolean.mk_eq context constr (Arithmetic.Integer.mk_numeral_i context target))
+    |> Optimize.add optimiser
+    |> ignore;
+    (* Objective: Minimise sum of x *)
+    xs |> Arithmetic.mk_add context |> Optimize.minimize optimiser |> ignore;
+    (* Solve *)
+    match Optimize.check optimiser with
+    | Solver.SATISFIABLE ->
+      let model = Optimize.get_model optimiser |> Option.get in
+      let values =
+        xs
+        |> List.map (fun x ->
+          Model.eval model x true |> Option.get |> Expr.to_string |> int_of_string)
+      in
+      values |> List.fold_left ( + ) 0
+    | _ -> failwith "unsat"
+  ;;
 end
