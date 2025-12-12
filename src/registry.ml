@@ -21,10 +21,8 @@ let get_solution key : (module Shared.Solver.T) =
   | "10a" -> (module Day10.Part1)
   | "10b" -> (module Day10.Part2)
   | "11a" -> (module Day11.Part1)
-  | "11b" ->
-    (module Day11.Part2)
-    (* | "12a" -> (module Day12.Part1) *)
-    (* | "12b" -> (module Day12.Part2) *)
+  | "11b" -> (module Day11.Part2)
+  | "12a" -> (module Day12.Part1)
   | "template" -> (module Template.Part1)
   | _ -> failwith (Printf.sprintf "solution %s not found" key)
 ;;
