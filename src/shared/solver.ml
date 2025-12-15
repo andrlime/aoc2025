@@ -29,6 +29,12 @@ module Make (M : Solution) : T = struct
     let starttime = current_timestamp_ms () in
     get_soln_string () |> Printf.printf "Solution: %s\n";
     let endtime = current_timestamp_ms () in
-    endtime -. starttime |> Printf.printf "Time: %f ms\n"
+    let timems = endtime -. starttime in
+    timems
+    |> fun ms ->
+    let us = ms *. 1000. in
+    if Float.(ms < 1.)
+    then Printf.printf "Time: %f ms (%f μs)\n" ms us
+    else Printf.printf "Time: %f ms\n" ms
   ;;
 end
